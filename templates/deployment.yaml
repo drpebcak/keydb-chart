@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "keydb-cluster.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "keydb-cluster.name" . }}
+    helm.sh/chart: {{ include "keydb-cluster.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "keydb-cluster.fullname" . }}-headless
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "keydb-cluster.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "keydb-cluster.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: {{ .Values.placement.key }}
+                    operator: In
+                    values:
+                      - {{ .Values.placement.value }}
+      containers:
+        - name: {{ .Chart.Name }}-db
+          image: "{{ .Values.image.keydb.repository }}:{{ .Values.image.keydb.tag }}"
+          imagePullPolicy: {{ .Values.image.keydb.pullPolicy }}
+          volumeMounts:
+            - name: keydb-data
+              mountPath: /data
+          ports:
+            - name: keydb
+              containerPort: 6379
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: keydb
+          readinessProbe:
+            tcpSocket:
+              port: keydb
+          command:
+            - "keydb-server"
+          args: ["/etc/keydb/redis.conf", "--port", "6379", "--version-override", "5.0.0", "--active-replica", "yes", "--multi-master", "yes", "--replica-read-only", "no", "--protected-mode", "no", "--bind", "0.0.0.0"{{- if .Values.password }}, "--requirepass", "{{ .Values.password }}", "--masterauth", "{{ .Values.password }}"{{- end -}}]
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- if .Values.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: keydb-data
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+        {{- if .Values.persistence.storageClassName }}
+        {{- if (eq "-" .Values.persistence.storageClassName) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: "{{ .Values.persistence.storageClassName }}"
+        {{- end }}
+        {{- end }}
+{{- end }}
