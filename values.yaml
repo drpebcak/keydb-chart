@@ -4,9 +4,6 @@
 
 replicaCount: 2
 password: ""
-placement:
-  key: nodepool
-  value: keydb
 image:
   keydb:
     repository: eqalpha/keydb

@@ -3,7 +3,18 @@ entries:
   keydb-cluster:
   - apiVersion: v2
     appVersion: 0.0.1
-    created: "2020-02-02T20:09:18.971917-07:00"
+    created: "2020-02-02T20:14:45.906304-07:00"
+    description: A KeyDB cluster chart for Kubernetes
+    digest: 285bca16892d257cff9cf31e5ad3fa4a63e9891b5cefb2ef71ee6a5373fdf71d
+    icon: https://keydb.dev/assets/img/slides/keydbwhite.png
+    name: keydb-cluster
+    type: application
+    urls:
+    - https://drpebcak.github.io/keydb-chart/keydb-cluster-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v2
+    appVersion: 0.0.1
+    created: "2020-02-02T20:14:45.905781-07:00"
     description: A KeyDB cluster chart for Kubernetes
     digest: 2f18d662aef30a27f1d724b022ca847dd1c8f68f4e2ae33571ba95e789d22fe7
     icon: https://keydb.dev/assets/img/slides/keydbwhite.png
@@ -12,4 +23,4 @@ entries:
     urls:
     - https://drpebcak.github.io/keydb-chart/keydb-cluster-0.0.1.tgz
     version: 0.0.1
-generated: "2020-02-02T20:09:18.966258-07:00"
+generated: "2020-02-02T20:14:45.904614-07:00"
